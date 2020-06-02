@@ -1,0 +1,157 @@
+---
+title: "Script 3 Model Selection"
+author: "Eziamaka Clinton"
+date: "03/04/2020"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+rm(list = ls())
+#install.packages("car")
+library(MASS) # for stepAIC function
+library(stats)# for step function
+library(leaps)# for Adjusted R2
+```
+
+```{r}
+setwd("~/Downloads/DataSet")
+myData <- read.table("BodyFat.txt", header = TRUE)
+data1<-myData[-c(42,182),]
+siri<-Y<-data1[,3]
+age<-data1[,4]
+hip<-data1[,5]
+thigh<-data1[,6]
+wrist<-data1[,7]
+neck<-data1[,8]
+abdomen<-data1[,9]
+height<-data1[,10]
+chest<-data1[,11]
+weight<-data1[,12]
+knee<-data1[,13]
+ankle<-data1[,14]
+biceps<-data1[,15]
+forearm<-data1[,16]
+CC<-cbind(age, hip, thigh, wrist, neck, abdomen, height, chest, weight, knee, ankle, biceps, forearm)
+
+fit<-lm(Y~age+hip+thigh+wrist+neck+abdomen+height+chest+weight+knee+ankle+biceps+forearm, data = data1)
+summary(fit)
+
+library(car)
+outlierTest(fit)
+
+#obs 39 is a suspected outlier
+
+```
+
+a.
+```{r}
+data<-myData[-c(39,42,182),]
+siri<-Y<-data[,3]
+age<-data[,4]
+hip<-data[,5]
+thigh<-data[,6]
+wrist<-data[,7]
+neck<-data[,8]
+abdomen<-data[,9]
+height<-data[,10]
+chest<-data[,11]
+weight<-data[,12]
+knee<-data[,13]
+ankle<-data[,14]
+biceps<-data[,15]
+forearm<-data[,16]
+fit1<-lm(Y~age+hip+thigh+wrist+neck+abdomen+height+chest+weight+knee+ankle+biceps+forearm, data = data)
+summary(fit1)
+
+# After looking at the coefficient and p value, we can observe that predictors age, abdomen, and wrist all have a low p value (<0.05). So we can conclude that they are the possible predictors for the final model.  
+```
+
+
+b. 
+1. 
+```{r}
+#Backward selection without any criteria
+
+fit2 = update(fit1, . ~ . - weight)
+summary(fit2)
+fit3 = update(fit2, . ~ . - knee)
+summary(fit3)
+fit4 = update(fit3, . ~ . - ankle)
+summary(fit4)
+fit5 = update(fit4, . ~ . - biceps)
+summary(fit5)
+fit6 = update(fit5, . ~ . - hip)
+summary(fit6)
+fit7 = update(fit6, . ~ . - thigh)
+summary(fit7)
+fit8 = update(fit7, . ~ . - neck)
+summary(fit8)
+fit9 = update(fit8, . ~ . - forearm)
+summary(fit9)
+fit10 = update(fit9, . ~ . - chest)
+summary(fit10)
+
+#After using the backward elimination method, we can observe how the p values of the predictors changed gradually as we eliminated other predictors. At the end we have predictors age, wrist, abdomen, weight, and height as the final selection from the Backward selection without any criteria as the process stops here because all the remaining terms are significant.
+
+```
+
+2. 
+```{r}
+#Forward selection with AIC Criterion
+
+#Fitting model with intercept only
+null=lm(Y~1, data = data)
+#Fitting model with all predictors
+full= lm(Y~age+hip+thigh+wrist+neck+abdomen+height+chest+weight+knee+ankle+biceps+forearm, data = data)
+
+# Forward selection procedure using AIC
+FORW1=stepAIC(null, scope=list(lower=null, upper=full), data=data, direction="forward", trace = 0)
+summary(FORW1)
+FORW1$anova
+
+#After using the forward elimination method, we can observe that the p values of the predictors age, wrist, abdomen, weight, and bicept are all low. And when we observe the anova, we can see that the variables with the higher/closer AIC to the truth model(intercept) are being selected into the final model. 
+```
+
+3.
+```{r}
+# Stepwise selection procedure AIC Criterion
+STEPW=stepAIC(null, scope = list(upper=full), data=data, direction="both")
+summary(STEPW)
+
+#After using the Stepwise selection with AIC criterion method, we can observe as the predictors hip, thigh, height, chest, neck, knee, forearm and ankle were eliminated gradually as a result of low AIC values which varyed as other variables were eliminated. And that the predictors abdomen, weight, wrist, bicept and age are being choosen to fit the final model as the fit model confirms low p-values for the selected predictors. 
+
+```
+
+5.
+```{r}
+#CP Statistic
+library(faraway)
+# To select model based on Criteria
+full= lm(Y~age+hip+thigh+wrist+neck+abdomen+height+chest+weight+knee+ankle+biceps+forearm, data = data)
+# fitting full model
+x = model.matrix(full)[,-1] 
+# write down matrix using predictors only
+y = data[,3]
+CP=leaps(x,y,method="Cp") 
+
+#To get the results in an easier format,
+cbind(CP$size,CP$which, CP$Cp)
+Cpplot(CP)
+
+
+#After observing the CP statistic, the competition is between model with predictors age,wrist,abdomen,height,chest,and forearm and model with predictors age,wrist,abdomen,height,chest,and bicept as they both are below the CP = p line indicating good fit. We will end up going for the model with lower CP value since they are of thesame size and conclude that our best model from the CP statistic is model with predictors age,wrist,abdomen,height,chest,and forearm.
+```
+
+4.
+```{r}
+# Adjusted R-square
+ADJR2 = leaps(x,y,method="adjr2") 
+maxadjr(ADJR2,14)
+plot(1:14, maxadjr(ADJR2,14), xlab="No. of Parameters",ylab="Adjusted R-square")
+
+
+# Adjusted R-square explains that some model have larger adjusted R squared. But after observing, the best 7 predictor model will be the model with predictors age, wrist, neck, abdomen, height, chest and forearm as it contains less predictors in comparision to others and it has a large R squared. 
+```

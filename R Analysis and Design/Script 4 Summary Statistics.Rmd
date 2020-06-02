@@ -1,0 +1,176 @@
+---
+title: "Script 4 Summary Statistics"
+author: "Eziamaka Clinton"
+date: "13/09/2019"
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+
+if(!require(Rmisc)){install.packages("Rmisc")}
+if(!require(DescTools)){install.packages("DescTools")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(boot)){install.packages("boot")}
+if(!require(rcompanion)){install.packages("rcompanion")}
+```
+
+1.
+```{r}
+
+myData <- read.csv("states.csv", header = TRUE)
+write.table(myData, "states.txt", row.names = TRUE)
+myData2 <- read.table("states.txt")
+head(myData2)
+```
+
+1i.
+```{r}
+# Mean, Standard deviation and Summary of the numerical variables.
+mean3<-mean(myData2[,3])
+median3<-median(myData2[,3])
+sd3<-sd(myData2[,3])
+summary3<-summary(myData2[,3])
+result3.out<-list(mean3, median3, sd3, summary3)
+names(result3.out)<-c("Mean", "Median", "SD", "Summary")
+
+mean4<-mean(myData2[,4])
+median4<-median(myData2[,4])
+sd4<-sd(myData2[,4])
+summary4<-summary(myData2[,4])
+result4.out<-list(mean4, median4, sd4, summary4)
+names(result4.out)<-c("Mean", "Median", "SD", "Summary")
+
+mean5<-mean(myData2[,5])
+median5<-median(myData2[,5])
+sd5<-sd(myData2[,5])
+summary5<-summary(myData2[,5])
+result5.out<-list(mean5, median5, sd5, summary5)
+names(result5.out)<-c("Mean", "Median", "SD", "Summary")
+
+mean6<-mean(myData2[,6])
+median6<-median(myData2[,6])
+sd6<-sd(myData2[,6])
+summary6<-summary(myData2[,6])
+result6.out<-list(mean6, median6, sd6, summary6)
+names(result6.out)<-c("Mean", "Median", "SD", "Summary")
+
+mean7<-mean(myData2[,7])
+median7<-median(myData2[,7])
+sd7<-sd(myData2[,7])
+summary7<-summary(myData2[,7])
+result7.out<-list(mean7, median7, sd7, summary7)
+names(result7.out)<-c("Mean", "Median", "SD", "Summary")
+
+mean8<-mean(myData2[,8])
+median8<-median(myData2[,8])
+sd8<-sd(myData2[,8])
+summary8<-summary(myData2[,8])
+result8.out<-list(mean8, median8, sd8, summary8)
+names(result8.out)<-c("Mean", "Median", "SD", "Summary")
+
+```
+
+ii.
+``` {r}
+# 95%CI of all numerical variables
+CI(myData2[,3], ci=0.95)
+CI(myData2[,4], ci=0.95)
+CI(myData2[,5], ci=0.95)
+CI(myData2[,6], ci=0.95)
+CI(myData2[,7], ci=0.95)
+CI(myData2[,8], ci=0.95)
+``` 
+
+iii.
+The plot is not as informative if all variabes are plotted together. From the seperated plots, we get to have a closer look at the variables with suspected outliers. And also see the variables on thier varying scales. 
+```{r}
+#Create plot for each numerical variable 
+
+boxplot(myData2[,3], xlab="pop")
+boxplot(myData2[,4], xlab="SATV")
+boxplot(myData2[,5], xlab="SATM")
+boxplot(myData2[,6], xlab="percent")
+boxplot(myData2[,7], xlab="dollars")
+boxplot(myData2[,8], xlab="pay")
+
+```
+
+iv.
+Yes. After plotting of the box, we can notice suspected outlier in some of the variables. The presence of suspected outliers in the pop, dollars, and pay variables.
+
+v. 
+Most of the outliers from the varibles were not present in the new plot. Some variables had all their variables removed, while some had the outliers reduced.
+```{r}
+df<-subset(myData2, select = -c(1,2))
+
+outlierRemover <-function(df) {
+  Quantiles <-quantile(df, probs=c(.25, .75))
+  Whiskers <- 1.5* IQR(df)
+  data.out <- df
+  data.out[df<(Quantiles[1]-Whiskers)] <- NA
+  data.out[df>(Quantiles[2]+Whiskers)] <- NA
+  return(data.out)
+}
+
+boxplot(outlierRemover(df[,1]), xlab="pop")
+boxplot(outlierRemover(df[,5]), xlab="dollars")
+boxplot(outlierRemover(df[,6]), xlab="pay")
+```
+
+vi. 
+The MTN region had the most regional occurence, PAC and ENC have and equal number of occurence, MA has the least occurence amongst the other variables.
+```{r}
+#prop.table(df)
+prop.region <- table(myData2[,2])/length(myData2[,2])
+barchart(prop.region, ylab = "region")
+```
+
+2.
+```{r}
+mySet <- read.table("myData2.txt", header = TRUE)
+head(mySet)
+```
+
+i.
+```{r}
+fun.y <- function(a,x){
+  y <- a*(x^2)
+  return(cbind(x,y))
+}
+
+```
+
+ii. 
+```{r}
+a <- c(-5, -2, 1, 3, 6)
+x <- c(mySet[c(1, 2, 3 ,4, 5),1])
+y <- fun.y(a,x)
+
+
+```
+
+iii. Positive linear regression
+
+v.
+```{r}
+par(mfrow=c(3,3))
+
+qqnorm(y[1,],plot.it = TRUE, main="Y1")
+qqline(y[1,], col="blue")
+
+qqnorm(y[2,],plot.it = TRUE,main="Y2")
+qqline(y[2,],col="blue")
+
+qqnorm(y[3,],plot.it = TRUE, main="Y3")
+qqline(y[3,],col="blue")
+
+qqnorm(y[4,],plot.it = TRUE,main="Y4")
+qqline(y[4,],col="blue")
+
+qqnorm(y[5,],plot.it = TRUE,main="Y5")
+qqline(y[5,],col="blue")
+
+```
+
+v. After plotting the graphs and seeing the distances from the fittest line of y, we can say the distribution of y was is not normal.

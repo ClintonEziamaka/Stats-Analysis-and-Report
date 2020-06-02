@@ -1,0 +1,29 @@
+---
+title: "Script 1 Linear Regression"
+author: "Eziamaka Clinton"
+date: "January 16, 2020"
+output: html_document
+---
+1a.
+```{r}
+x<-c(28, 26, 42, 29, 16, 21, 25, 35, 30, 36, 37, 41, 20, 26, 38, 26, 10, 18, 10, 31)
+
+y<-c(15, 14, 15, 12, 37, 30, 7, 14, 28, 13, 5, 13, 24, 8, 13, 17, 27, 29, 8, 5)
+
+plot(x,y)
+#From the scatter plot obtained, we can conclude that due to less patterns and decrease in both x and y factors, that their is a negative relationship between x and y. X and Y have negative correlation.
+
+```
+b.
+```{r}
+fit<-lm(y~x)
+summary(fit) 
+
+#The fitted square regression y=29.2210-0.4595x
+#The estimate of slope parameter interprets that as you move along the fitted line, there is a significant rate of change of -0.4595 in the pulmonary arterial wedge pressure(y) as the ejection factor changes(x).
+```
+
+c.
+```{r}
+#An unbiased estimator of the error variance will be the mean square error.
+```

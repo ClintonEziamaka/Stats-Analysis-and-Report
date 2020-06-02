@@ -1,0 +1,65 @@
+---
+title: "Script 2 Multiple Linear Regression"
+author: "Eziamaka Clinton"
+date: "08/03/2020"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+rm(list = ls())
+setwd("~/Downloads/DataSet")
+myData <- read.table("BodyFat.txt", header = TRUE)
+data<-myData[-c(42,182),]
+siri<-Y<-data[,3]
+age<-data[,4]
+hip<-data[,5]
+thigh<-data[,6]
+wrist<-data[,7]
+neck<-data[,8]
+abdomen<-data[,9]
+height<-data[,10]
+chest<-data[,11]
+weight<-data[,12]
+knee<-data[,13]
+ankle<-data[,14]
+biceps<-data[,15]
+forearm<-data[,16]
+CC<-cbind(age, hip, thigh, wrist, neck, abdomen, height, chest, weight, knee, ankle, biceps, forearm)
+
+#a.
+#Draw Matric plot
+library(graphics)
+pairs(siri~age+hip+thigh+wrist+neck+abdomen+height+chest)
+#From the matrix plot, we can see that variabes hip, neck, abdomen, chest and wrist have a linear relationship with siri and are helpful in predicting the body fat. 
+
+#b. 
+round(cor(data),1)
+#Ater using the correlation function, we can observe rom the correlation matrix that variabes age, height, and wrist have low correlation of <0.5 with respect to the variable body fat. While variables neck, chest, abdomen, hip, and thigh have high correlation of >0.5 with respect to the variable body fat.Hip has a high correlation with other variables except thigh. Yes it is consistent with the scatter plot matrix. 
+
+
+#c. 
+fit<-lm(Y~age+hip+thigh+wrist+neck+abdomen+height+chest)
+summary(fit)
+#The fitted regression line is: 
+
+```
+
+d. 
+$H_0:B_1=B_2=B_3=B_4=B_5=B_6=B_7=B_8=0$
+$H_a:B_j\ne0\ for\ at\ least\ one\ j$
+```{r}
+anova(fit)
+#From the anova table computed, we can see that the variables height and chest have a high p value (>0.05) while other variabes have a low p value (<0.05). In conclusion, we reject the null hypothesis and conclude that variables height and chest are not statistically significant to the model.
+```
+
+e.
+```{r}
+X<-matrix(cbind(rep(1,length(age)), CC), nrow=length(age), ncol=9)
+MSE<-19.4
+C<-solve(t(X)%*%X)
+bottom<-sqrt(MSE*C)
+
+```
